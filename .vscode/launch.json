@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "launch",
+            "type": "lua",
+            "request": "launch",
+            "stopOnEntry": true,
+            "program": "${workspaceRoot}/u11.lua",
+            "cwd": "${workspaceRoot}",
+            "path": "${workspaceRoot}/?.lua",
+            "cpath": "${workspaceRoot}/?.dll",
+            "arg": [],
+        },
+        {
+            "name": "attach",
+            "type": "lua",
+            "request": "attach",
+            "stopOnEntry": true,
+            "ip": "localhost",
+            "port": 4278,
+            "sourceMaps": [
+                [
+                    "./",
+                    "${workspaceRoot}"
+                ]
+            ]
+        }
+    ]
+}
