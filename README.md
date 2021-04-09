@@ -468,3 +468,80 @@ string pp_key()
 功能：获取与弹窗协商的校验码(当前进程id的md5值)
 参数：无
 返回值：弹窗协商的校验码
+
+<*********************  新增unicorn接口获取用户设备信息  ******************>
+
+接口变量：
+使用方法：unicorn.variable
+
+system_info{} （这是一个结构体）
+.v1 系统版本号第一位(DWORD)
+.v2 系统版本号第二位(DWORD)
+.v3 系统版本号第三位(DWORD)
+.v4 系统版本号第四位(DWORD)
+.is64bit 是否是64位系统(bool)
+boot_time 开机时间(DWORD)
+process[] 进程列表(这是一个数组)
+接口函数：
+使用方法：unicorn.function(...)
+
+void printf(string content)
+功能：在控制台打印内容、正式版是无效的
+参数：content为需要打印的内容
+返回值：无
+
+bool reg_key_exist(string root_key,string key)
+功能：判断注册表项是否存在、不能判断值是否存在
+参数：root_key为根节点、只限于"HKCU"、"HKLK"
+key为子节点
+注意："HKCU"对应"HKEY_CURRENT_USER"
+"HKLK"对应"HKEY_LOCAL_MACHINE"
+返回值：存在返回true、不存在返回false
+
+string reg_read_string(string root_key,string key,string name)
+功能：获取注册表string值
+参数：name为需要读取的名称、其它参照reg_key_exist
+返回值：存在返回内容、不存在返回空字符串
+
+bool reg_write_string(string root_key,string key,string name,string value)
+功能：写入注册表string值
+参数：value为需要写入的值、其它参照reg_read_string
+返回值：成功返回true、失败返回false
+
+DWORD reg_read_dword(string root_key,string key,string name)
+功能：获取注册表DWORD值
+参数：name为需要读取的名称、其它参照reg_key_exist
+返回值：存在返回内容、不存在返回0
+
+bool reg_write_dword(string root_key,string key,string name,DOWRD value)
+功能：写入注册表DOWRD值
+参数：value为需要写入的值、其它参照reg_read_string
+返回值：成功返回true、失败返回false
+
+bool full_screen()
+功能：判断是否全屏
+参数：无
+返回值：全屏返回true、非全屏返回false
+
+string web_http_get(string url)
+功能：从web端获取内容
+参数：url为获取地址
+返回值：成功返回内容、失败返回空字符串
+
+bool file_exists(long csidl,string sub_path)
+功能：判断文件是否存在
+参数：csidl为windows路径的一个标识（https://msdn.microsoft.com/en-us/library/windows/desktop/bb762494(v=vs.85).aspx）、不需要时可以传-1
+sub_path为子路径
+注意：csidl + sub_path为文件全路径、当csidl为-1时
+sub_path为文件全路径
+返回值：存在返回true、不存在返回false
+
+time_t read_timestamp(string root_key,string key,string name)
+功能：获取注册表时间戳time_t
+参数：参照reg_read_string
+返回值：成功返回时间戳、失败返回0
+
+time_t write_timestamp(string root_key,string key,string name,time_t timestamp)
+功能：写入注册表时间戳time_t
+参数：timestamp为写入的时间戳、其它参照reg_wr_string
+返回值：成功返回true、失败返回false
